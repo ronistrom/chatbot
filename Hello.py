@@ -34,26 +34,24 @@ def ingest_cube_meta():
 
     # Save vectorstore
     with open("vectorstore.pkl", "wb") as f:
-        pickle.dump(vectorstore, f)
+        vectorstore.save_local("faiss_store")
         
 if not Path("vectorstore.pkl").exists():
-    with st.spinner('Loading context from Cube API...'):
+    with st.spinner('Loading context from semantic layer...'):
         ingest_cube_meta();
 
 llm = OpenAI(
     temperature=0, openai_api_key=os.environ.get("OPENAI_API_KEY"), verbose=True
 )
 
-st.title("Cube and LangChain demo 🤖🚀")
+st.title("Generative BI demo")
 
 multi = '''
-Follow [this tutorial on Github](https://github.com/cube-js/cube/tree/master/examples/langchain) to clone this project and run it locally. 
-
-You can use these sample questions to quickly test the demo --
-* How many orders?
-* How many completed orders?
-* What are top selling product categories?
-* What product category drives the highest average order value?
+You can use these sample questions to quickly test the demo:
+* What is the total value of won deals in Dec 2023?
+* What's the split of won deals in 2023 between business areas?
+* What's the split of won deals in 2023 between deal types?
+* What were the top 5 biggest won deals in 2023? Output deal name, close date, value, business area and deal type?
 '''
 st.markdown(multi)
 
@@ -66,7 +64,7 @@ if st.button("Submit", type="primary"):
     if not Path("vectorstore.pkl").exists():
         st.warning("vectorstore.pkl does not exist.")
     with open("vectorstore.pkl", "rb") as f:
-        vectorstore = pickle.load(f)
+        vectorstore = FAISS.load_local("faiss_store", OpenAIEmbeddings())
 
     # log("Quering vectorstore and building the prompt...")
 
@@ -114,7 +112,7 @@ if st.button("Submit", type="primary"):
     st.info(sql_query)
 
     # Call Cube SQL API
-    log("Sending the above query to Cube...")
+    log("Sending the above query to semantic layer...")
     columns, rows = call_sql_api(sql_query)
 
     # Display the result
