@@ -1,5 +1,10 @@
-altair
-numpy
-pandas
-pydeck
 streamlit
+pandas
+python-dotenv
+langchain
+pathlib
+PyJWT
+openai
+tiktoken
+faiss-cpu
+psycopg2-binary
